@@ -9,36 +9,6 @@
 
     class TrackInterface extends Controller {
         /**
-         * @param $searchterm
-         * @param bool $fuzzy -- use fuzzy search on either end of the searchterm
-         * @param int $limit - max results amount
-         *
-         * @return mixed
-         *
-         * Search for a given searchterm
-         */
-        public static function track_search($searchterm, $fuzzy = true, $limit = 5) {
-            try {
-                $api = APIInterface::initPublicAPI();
-
-                if ($fuzzy) $searchterm = '*' . $searchterm . '*';
-
-                $tracks = $api->search($searchterm, 'track',
-                [
-                    'limit' => $limit,
-                ]);
-
-                $tracks = Helpers::removeExplicit($tracks->tracks->items);
-
-                return $tracks;
-
-            } catch (Exception $ex) {
-                // Expired, need to log in again
-                return Redirect::to(route('spotify.logout'));
-            }
-        }
-
-        /**
          * @param $id
          *
          * @return array|object

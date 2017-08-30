@@ -5,21 +5,11 @@ A sweet spotify platform for Made in Katana
 1) Firstly follow the instructions to install Soda CMS at:
 https://github.com/soda-framework/cms
 
-2) Apply these changes to your `composer.json` file
+2) Install Soda Spotify
 
 ```
 #!json
-
-"repositories": [
-    {
-        "type": "vcs",
-        "url": "git@bitbucket.org:made-in-katana/soda-spotify.git"
-    }
-],
-"require": { 
-    "soda-framework/cms": "^0.5.7",
-    "soda-framework/spotify": "^4.0.0",
-},
+composer require soda-framework/spotify
 ```
 
 3) Install these packages using NPM.
@@ -31,7 +21,7 @@ These are needed for compiling the Vue Components in this package.
 "axios": ""
 ```
 
-4) Integrate MIK Spotify into laravel by adding `Soda\Spotify\Providers\SpotifyServiceProvider::class`
+4) Integrate Soda Spotify into laravel by adding `Soda\Spotify\Providers\SpotifyServiceProvider::class`
 in the providers array in `/config/app.php`
 ```
     'providers' => [
