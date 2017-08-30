@@ -1,0 +1,43 @@
+{
+  "name": "soda-framework/spotify",
+  "description": "A sweet Spotify suite built on Soda CMS",
+  "license": "MIT",
+  "keywords": [
+    "soda-framework",
+    "soda",
+    "framework",
+    "spotify"
+  ],
+  "homepage": "https://github.com/soda-framework/spotify",
+  "authors": [
+    {
+      "name": "Caleb Chadwick",
+      "email": "chadwickcaleb@gmail.com"
+    },
+    {
+      "name": "Ryan Brereton-Canham",
+      "email": "ryan@madeinkatana.com"
+    },
+    {
+      "name": "Jarrad Littleford",
+      "email": "jplittleford@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.0",
+    "soda-framework/cms": ">=0.7",
+    "laravel/framework": "~5.3",
+    "ext-curl": "*",
+    "doctrine/dbal": "^2.5"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^4.0",
+    "satooshi/php-coveralls": "dev-master",
+    "squizlabs/php_codesniffer": "^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Soda\\Spotify\\": "src/"
+    }
+  }
+}
