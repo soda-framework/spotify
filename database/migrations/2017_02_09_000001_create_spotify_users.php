@@ -27,6 +27,7 @@ class CreateSpotifyUsers extends Migration
             $table->text('access_token')->nullable();
             $table->string('access_token_expiration')->nullable();
             $table->text('refresh_token')->nullable();
+            $table->string('remember_token',100)->nullable();
             $table->timestamps();
             $table->dateTime('last_loggedin_at')->nullable();
         });
