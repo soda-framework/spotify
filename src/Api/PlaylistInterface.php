@@ -111,9 +111,11 @@
             $return = $request->input('return');
 
             try {
-                $api = APIInterface::getAPI();
+                $user = AuthInterface::get_user(); // assumed user logged by now
+                $api = APIInterface::getUserAPI($user);
 
                 $uris = explode(':',$playlist_uri);
+                $playlist = PlaylistInterface::get_playlist($uris[2], $uris[4]);
 
                 $api->followPlaylist($uris[2], $uris[4]);
 
@@ -121,14 +123,7 @@
                 Session::put('added_playlist_' . $playlist_id, $uris[4]);
 //                Session::save();
 
-                if ( $return == 'close' ) {
-                    return Helpers::close_tab();
-                } else if ( $return == 'spotify' ) {
-                    $playlist = PlaylistInterface::get_playlist($uris[2], $uris[4]);
-                    return Redirect::to($playlist->external_urls->spotify);
-                }
-
-                return Redirect::back();
+                return Helpers::playlist_return($playlist, $user, $return);
 
             } catch (Exception $ex) {
                 // Expired, need to log in again
@@ -150,33 +145,26 @@
                     $tracklist = Helpers::getIDs($tracklist);
                 }
 
-                $api = APIInterface::getAPI();
-                $user = $api->me();
+                $user = AuthInterface::get_user(); // assumed user logged by now
+                $api = APIInterface::getUserAPI($user);
 
                 // Create user playlist
-                $user_playlist = $api->createUserPlaylist($user->id, ['name' => $name]);
+                $user_playlist = $api->createUserPlaylist($user->user_id, ['name' => $name]);
 
                 // add tracks to the playlist
-                $api->addUserPlaylistTracks($user->id, $user_playlist->id, $tracklist);
+                $api->addUserPlaylistTracks($user->user_id, $user_playlist->id, $tracklist);
 
                 // add custom image if present
                 if( @$image ){
                     $image = file_get_contents($image);
                     $image = base64_encode($image);
-                    $api->addUserPlaylistImage($user->id, $user_playlist->id, $image);
+                    $api->addUserPlaylistImage($user->user_id, $user_playlist->id, $image);
                 }
 
                 // save as added
                 Session::put('added_playlist_' . $playlist_id, $user_playlist->id);
-//                Session::save();
 
-                if( $return == 'close' ){
-                    return Helpers::close_tab();
-                }
-                else if ( $return == 'spotify' ) {
-                    return Redirect::to($user_playlist->external_urls->spotify);
-                }
-                return Redirect::back();
+                return Helpers::playlist_return($user_playlist, $user, $return);
 
             } catch (Exception $ex) {
                 $errorUrl = Helpers::merge_get_url(route('spotify.logout'), 'spotify_error=' . $ex->getMessage());

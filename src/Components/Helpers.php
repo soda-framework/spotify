@@ -236,6 +236,36 @@
             return $json;
         }
 
+        public static function playlist_return($playlist,$user,$return='redirect') {
+            // close the tab
+            if ( $return == 'close' ) {
+                return Helpers::close_tab();
+            }
+            // send them to spotify's website
+            else if ( $return == 'spotify-url' ) {
+                return Redirect::to($playlist->external_urls->spotify);
+            }
+            // send them to spotify's app
+            else if ( $return == 'spotify-uri' ) {
+                url()->forceScheme('spotify://');
+                return Redirect::to($playlist->uri);
+            }
+            // choose the type of spotify to return to
+            else if ( $return == 'spotify' ) {
+                $devices = PlayerInterface::get_devices($user);
+
+                // user has a device, send them to the URI
+                if ( $devices && count($devices) > 0 ) {
+                    return Helpers::playlist_return($playlist, $user, 'spotify-uri');
+                }
+
+                // no device, web based link
+                return Helpers::playlist_return($playlist, $user, 'spotify-url');
+            }
+            // send them back where they came from
+            return Redirect::back();
+        }
+
         public static function close_tab(){
             return '<script>window.close()</script>';
         }

@@ -1344,4 +1344,21 @@ class Spotify
 
         return $this->lastResponse['body'];
     }
+
+    /**
+     * Get information about a user’s available devices.
+     * Requires a valid access token.
+     * https://developer.spotify.com/web-api/get-a-users-available-devices/
+     *
+     * @return array|object The currently authenticated user. Type is controlled by Spotify::setReturnAssoc().
+     */
+    public function myDevices() {
+        $headers = $this->authHeaders();
+
+        $uri = '/v1/me/player/devices';
+
+        $this->lastResponse = $this->request->api('GET', $uri, [], $headers);
+
+        return $this->lastResponse['body'];
+    }
 }
