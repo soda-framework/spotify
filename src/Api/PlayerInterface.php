@@ -7,6 +7,10 @@
     // https://developer.spotify.com/web-api/web-api-connect-endpoint-reference/
     class PlayerInterface extends Controller {
 
+        public static $scopes = [
+            'user-modify-playback-state',
+        ];
+
         // https://developer.spotify.com/web-api/get-a-users-available-devices/
         public static function get_devices($user=false){
             $user = $user ? $user : AuthInterface::get_user();

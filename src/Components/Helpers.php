@@ -252,11 +252,14 @@
                 return Redirect::to($playlist->uri);
             } // choose the type of spotify to return to
             else if ( $return == 'spotify' ) {
-                $devices = PlayerInterface::get_devices($user);
+                // check if permissions are all enabled
+                if ( Helpers::hasScopes(PlayerInterface::$scopes) ) {
+                    $devices = PlayerInterface::get_devices($user);
 
-                // user has a device, send them to the URI
-                if ( $devices && count($devices) > 0 ) {
-                    return Helpers::playlist_return($playlist, $user, 'spotify-uri');
+                    // user has a device, send them to the URI
+                    if ( $devices && count($devices) > 0 ) {
+                        return Helpers::playlist_return($playlist, $user, 'spotify-uri');
+                    }
                 }
 
                 // no device, web based link
@@ -265,6 +268,10 @@
 
             // send them back where they came from
             return Redirect::back();
+        }
+
+        public static function hasScopes($desiredScopes) {
+            return count($desiredScopes) == count(array_intersect($desiredScopes, config('soda.spotify.login_scopes')));
         }
 
         public static function close_tab() {
