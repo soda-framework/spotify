@@ -12,34 +12,27 @@
     use Soda\Spotify\Models\Settings;
 
     class PlaylistInterface extends Controller {
+
         public static function get_playlist($user_id, $id, $api = null) {
-            $api = APIInterface::initPublicAPI();
+            $api = APIInterface::initAPI($api);
 
             $playlist = $api->getUserPlaylist($user_id, $id);
 
             return $playlist;
         }
 
-        public static function get_playlists($user_id, $api = null) {
-            $api = APIInterface::initPublicAPI();
+        public static function get_playlist_from_uri($uri, $api = null) {
+            $api = APIInterface::initAPI($api);
 
-            $playlist = $api->getUserPlaylists($user_id);
-
-            return $playlist;
-        }
-
-        public static function get_user_playlist($user, $id, $api = null) {
-            $api = APIInterface::getUserAPI($user);
-
-            $playlist = $api->getUserPlaylist($user->user_id, $id);
+            $uri = explode(':', $uri);
+            $playlist = $api->getUserPlaylist($uri[2], $uri[4]);
 
             return $playlist;
         }
 
-        public static function get_user_playlists($user, $api = null) {
-            $api = APIInterface::getUserAPI($user);
-
-            $playlists = $api->getUserPlaylists($user->user_id);
+        public static function get_user_playlists($user_id, $api = null) {
+            $api = APIInterface::initAPI($api);
+            $playlists = $api->getUserPlaylists($user_id);
 
             return $playlists;
         }

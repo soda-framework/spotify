@@ -3,11 +3,13 @@
     namespace Soda\Spotify\Api;
 
     use App\Http\Controllers\Controller;
+    use Soda\Spotify\Components\Helpers;
 
     // https://developer.spotify.com/web-api/web-api-connect-endpoint-reference/
     class PlayerInterface extends Controller {
 
         public static $scopes = [
+            'user-read-playback-state',
             'user-modify-playback-state',
         ];
 
@@ -40,5 +42,25 @@
 
                 return count($available_device) > 0 ? array_first($available_device) : false;
             }
+            return false;
+        }
+
+        public static function play_on_device($content, $device_id, $user = false) {
+            $user = $user ? $user : AuthInterface::get_user();
+            if ( $user && Helpers::hasScopes(PlayerInterface::$scopes) ) {
+                $api = APIInterface::getUserAPI($user);
+
+                $options = [];
+                if( is_array($content) || strpos($content, 'track') !== false ){
+                    $options['uris'] = is_array($content) ? $content : [$content];
+                }
+                else{
+                    $options['context_uri'] = $content;
+                }
+
+                return $api->devicePlay($options);
+            }
+
+            return false;
         }
     }

@@ -1361,4 +1361,33 @@ class Spotify
 
         return $this->lastResponse['body'];
     }
+
+    /**
+     * Start a new context or resume current playback on the user’s active device.
+     * This endpoint is in Beta.
+     * Requires a valid access token issued on behalf of a premium user.
+     * @param $options
+     *
+     * @return mixed
+     */
+    public function devicePlay($options, $device_id=null){
+        $options = json_encode((array) $options);
+
+        $headers = $this->authHeaders();
+        $headers['Content-Type'] = 'application/json';
+
+        $uri = '/v1/me/player/play';
+        if( $device_id ){
+            $uri .= '?device_id=' . $device_id;
+        }
+
+        $this->lastResponse = $this->request->api('PUT', $uri, $options, $headers);
+
+        if( isset($this->lastResponse['status']) && $this->lastResponse['status'] == 204 ){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }
