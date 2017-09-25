@@ -89,7 +89,7 @@
          */
         public static function removeExplicit($tracks) {
             // remove explicit tracks
-            if ( config('soda.spotify.allow_explicit') === true ) {
+            if ( config('soda.spotify.allow_explicit') !== true ) {
                 // create new empty container
                 $appropriate_tracks = [];
 
@@ -206,19 +206,40 @@
         public static function reduceResults($tracks) {
             foreach ($tracks as $key => $track) {
                 $json = [
-                    'id'          => $track->id,
-                    'name'        => $track->name,
-                    'preview_url' => $track->preview_url,
-                    'uri'         => $track->uri,
-                    'url'         => $track->external_urls->spotify,
-                    'image'       => isset($track->album) &&
-                                     isset($track->album->images) &&
-                                     count($track->album->images) > 0 ?
-                                        $track->album->images[0]->url : null,
-                    'artists'     => self::json_artists($track->artists)
+                    'id'          => @$track->id,
+                    'name'        => @$track->name,
+                    'preview_url' => @$track->preview_url,
+                    'uri'         => @$track->uri,
+                    'url'         => @$track->external_urls->spotify,
+                    'album'       => [
+                        'id'    => @$track->album->id,
+                        'name'  => @$track->album->name,
+                        'image' => @$track->album->images[0]->url,
+                        'uri'   => @$track->album->uri,
+                        'url'   => @$track->album->external_urls->spotify,
+                    ],
+                    'artists'     => self::json_artists(@$track->artists)
                 ];
 
                 $tracks[$key] = $json;
+            }
+
+            return $tracks;
+        }
+
+        public static function reachTrackLimit($tracks, $limit, $filler_track_ids) {
+            // get amount needed
+            $amt_under_limit = $limit - count($tracks);
+
+            // if needed
+            if ( $amt_under_limit > 0 ) {
+                shuffle($filler_track_ids);
+                $filler_track_ids = array_slice($filler_track_ids, 0, $amt_under_limit);
+                $filler_tracks = SpotifyInterface::get_tracks($filler_track_ids);
+                $filler_tracks = $filler_tracks->tracks;
+
+                // add tracks to the list
+                $tracks = array_merge($tracks, $filler_tracks);
             }
 
             return $tracks;

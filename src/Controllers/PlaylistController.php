@@ -97,13 +97,15 @@
                     $tracks = array_merge($seed_tracks,$tracks);
                 }
 
-                $tracks = self::removeDuplicateArtists($tracks); // remove duplicates
+                $tracks = Helpers::removeExplicit($tracks); // remove explicit
+
+                $tracks = Helpers::removeDuplicateArtists($tracks); // remove duplicates
 
                 if( count( $filler_track_ids ) > 0 ){
-                    $tracks = self::reachTrackLimit($tracks,$limit,$filler_track_ids); // remove duplicates
+                    $tracks = Helpers::reachTrackLimit($tracks,$limit,$filler_track_ids); // remove duplicates
                 }
 
-                $tracks = self::reduceResults($tracks); // convert tracks to smaller data
+                $tracks = Helpers::reduceResults($tracks); // convert tracks to smaller data
 
                 // trim to actual limit
                 $tracks = array_slice($tracks,0,$limit);
@@ -118,115 +120,5 @@
             else {
                 throw new Exception("You MUST have any one of seed_genres, seed_tracks or seed_artists.");
             }
-        }
-
-        /**
-         * @param $items
-         *
-         * @return array|object
-         *
-         * Remove duplicate artists
-         */
-        public static function removeDuplicateArtists($items){
-            $results = []; // unique results
-            $found_artists = []; // database of processed keys
-
-            foreach($items as $item){
-                // if not already found
-                if( !in_array($item->artists[0]->id, $found_artists) ){
-                    // add to found artists
-                    $found_artists[] = $item->artists[0]->id;
-                    // add item to unique results
-                    $results[] = $item;
-                }
-            }
-
-            return $results;
-        }
-
-        /**
-         * @param $items
-         * @param $limit
-         *
-         * @return array|object
-         *
-         * Remove duplicate tracks
-         */
-        public static function removeDuplicateTracks($items,$limit){
-            $results = []; // unique results
-            $found_tracks = []; // database of processed keys
-
-            foreach($items as $item){
-                // stop if already reached limit
-                if( count($results) >= $limit ) break;
-
-                // if not already found
-                if( !in_array($item->id, $found_tracks) ){
-                    // add to found artists
-                    $found_tracks[] = $item->id;
-                    // add item to unique results
-                    $results[] = $item;
-                }
-            }
-
-            // ensure limit met
-            $results = array_slice($results, 0, $limit);
-
-            return $results;
-        }
-
-        public static function reduceResults($tracks){
-            foreach($tracks as $key=>$track){
-                $json = [
-                    'id'          => @$track->id,
-                    'name'        => @$track->name,
-                    'preview_url' => @$track->preview_url,
-                    'uri'         => @$track->uri,
-                    'url'         => @$track->external_urls->spotify,
-                    'album'       => [
-                        'id'    => @$track->album->id,
-                        'name'  => @$track->album->name,
-                        'image' => @$track->album->images[0]->url,
-                        'uri'   => @$track->album->uri,
-                        'url'   => @$track->album->external_urls->spotify,
-                    ],
-                    'artists'     => self::json_artists(@$track->artists)
-                ];
-
-                $tracks[$key] = $json;
-            }
-
-            return $tracks;
-        }
-
-        public static function reachTrackLimit($tracks,$limit,$filler_track_ids){
-            // get amount needed
-            $amt_under_limit = $limit - count($tracks);
-
-            // if needed
-            if( $amt_under_limit > 0 ){
-                shuffle($filler_track_ids);
-                $filler_track_ids = array_slice( $filler_track_ids, 0, $amt_under_limit );
-                $filler_tracks = SpotifyInterface::get_tracks($filler_track_ids);
-                $filler_tracks = $filler_tracks->tracks;
-
-                // add tracks to the list
-                $tracks = array_merge($tracks, $filler_tracks);
-            }
-
-            return $tracks;
-        }
-
-        public static function json_artists($artists=[]){
-            $json = [];
-            foreach($artists as $artist){
-                $json[] = [
-                    'id' => @$artist->id,
-                    'name' => @$artist->name,
-                    'uri' => @$artist->uri,
-                    'url' => @$artist->external_urls->spotify,
-                ];
-            }
-            return $json;
         }
     }

@@ -148,13 +148,13 @@ Response
 *There is a function to convert an array of Spotify Created tracks JSON to this format*
 ```
 #!php
-Soda\Spotify\Controllers\PlaylistController::reduceResults($tracks); // $tracks is an array of Spotify Created track objects
+Soda\Spotify\Components\Helpers::reduceResults($tracks); // $tracks is an array of Spotify Created track objects
 ```
 
 ###Creating a Playlist
 ```
 #!php
-$playlist = \Soda\Spotify\Controllers\PlaylistController::create_playlist($seeds);
+$playlist = \Soda\Spotify\Controllers\PlaylistController::create_seeded_playlist($seeds);
 ```
 $seeds is an array of seeds as defined in https://developer.spotify.com/web-api/get-recommendations/.
 
