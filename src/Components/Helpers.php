@@ -251,8 +251,13 @@
             $artists = collect((array) $artists);
             foreach ($artists->chunk(50) as $_artists) {
                 if ( $includeImages ) {
-                    $_artists = ArtistInterface::get_artists($_artists->pluck('id')->toArray());
-                    $_artists = $_artists->artists;
+                    $_artist = $_artists->first();
+                    // check that images aren't already accessible
+                    if ( isset($_artist) && ( ! isset($_artist->images) || count($_artist->images) <= 0) ) {
+                        // get artists and their images if it isn't already available
+                        $_artists = ArtistInterface::get_artists($_artists->pluck('id')->toArray());
+                        $_artists = $_artists->artists;
+                    }
                 }
 
                 foreach ($_artists as $artist) {
