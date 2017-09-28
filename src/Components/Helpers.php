@@ -5,10 +5,11 @@
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Facades\Redirect;
     use Illuminate\Support\Facades\Session;
+    use Soda\Spotify\Api\ArtistInterface;
     use Soda\Spotify\Api\PlayerInterface;
 
-    class Helpers
-    {
+    class Helpers {
+
         /**
          * @param $url
          * @param $other_query_string
@@ -27,7 +28,7 @@
             $url_parsed = parse_url($url);
             $new_qs_parsed = [];
             // Grab our first query string
-            if( isset($url_parsed['query']) ) {
+            if ( isset($url_parsed['query']) ) {
                 parse_str($url_parsed['query'], $new_qs_parsed);
             }
 
@@ -145,7 +146,7 @@
          *
          * Remove duplicate artists
          */
-        public static function removeDuplicateArtists($items, $limit=false) {
+        public static function removeDuplicateArtists($items, $limit = false) {
             $results = []; // unique results
             $found_artists = []; // database of processed keys
 
@@ -178,7 +179,7 @@
          *
          * Remove duplicate tracks
          */
-        public static function removeDuplicateTracks($items, $limit=false) {
+        public static function removeDuplicateTracks($items, $limit = false) {
             $results = []; // unique results
             $found_tracks = []; // database of processed keys
 
@@ -196,14 +197,14 @@
             }
 
             // ensure limit met
-            if( $limit ){
+            if ( $limit ) {
                 $results = array_slice($results, 0, $limit);
             }
 
             return $results;
         }
 
-        public static function reduceResults($tracks) {
+        public static function reduceResults($tracks, $imageType = 'artist') {
             foreach ($tracks as $key => $track) {
                 $json = [
                     'id'          => @$track->id,
@@ -218,7 +219,7 @@
                         'uri'   => @$track->album->uri,
                         'url'   => @$track->album->external_urls->spotify,
                     ],
-                    'artists'     => self::json_artists(@$track->artists)
+                    'artists'     => self::json_artists(@$track->artists, $imageType == 'artist')
                 ];
 
                 $tracks[$key] = $json;
@@ -245,52 +246,66 @@
             return $tracks;
         }
 
-        public static function json_artists($artists) {
+        public static function json_artists($artists, $includeImages = true) {
             $json = [];
-            foreach ($artists as $artist) {
-                $json[] = [
-                    'id'   => $artist->id,
-                    'name' => $artist->name,
-                    'uri'  => $artist->uri,
-                    'url'  => $artist->external_urls->spotify,
-                ];
+            $artists = collect((array) $artists);
+            foreach ($artists->chunk(50) as $_artists) {
+                if ( $includeImages ) {
+                    $_artists = ArtistInterface::get_artists($_artists->pluck('id')->toArray());
+                    $_artists = $_artists->artists;
+                }
+
+                foreach ($_artists as $artist) {
+                    $_artist = [
+                        'id'   => $artist->id,
+                        'name' => $artist->name,
+                        'uri'  => $artist->uri,
+                        'url'  => $artist->external_urls->spotify,
+                    ];
+
+                    if ( $includeImages ) {
+                        $_artist['image'] = isset($artist->images) && count($artist->images) > 0 ? $artist->images[0]->url : null;
+                    }
+
+                    $json[] = $_artist;
+                }
             }
 
             return $json;
         }
 
-        public static function playlist_return($playlist,$user,$return='redirect') {
+        public static function playlist_return($playlist, $user, $return = 'redirect') {
             // close the tab
             if ( $return == 'close' ) {
                 return Helpers::close_tab();
-            }
-            // send them to spotify's website
+            } // send them to spotify's website
             else if ( $return == 'spotify-url' ) {
                 return Redirect::to($playlist->external_urls->spotify);
-            }
-            // send them to spotify's app
+            } // send them to spotify's app
             else if ( $return == 'spotify-uri' ) {
 //                url()->forceScheme('spotify://');
 //                return Redirect::to($playlist->uri);
 
                 // try and play on the first available device
                 $device = PlayerInterface::get_first_available_device();
-                if( $device && PlayerInterface::play_on_device($playlist->uri, $device->id) ){
+                if ( $device && PlayerInterface::play_on_device($playlist->uri, $device->id) ) {
                     // then close the tab
                     return Helpers::playlist_return($playlist, $user, 'close');
                 }
+
                 // otherwise, just send them to the webpage
                 return Helpers::playlist_return($playlist, $user, 'spotify-url');
             }
+
             // send them back where they came from
             return Redirect::back();
         }
 
-        public static function hasScopes($desiredScopes){
+        public static function hasScopes($desiredScopes) {
             return count($desiredScopes) == count(array_intersect($desiredScopes, config('soda.spotify.login_scopes')));
         }
 
-        public static function close_tab(){
+        public static function close_tab() {
             return '<script>window.close()</script>';
         }
     }
