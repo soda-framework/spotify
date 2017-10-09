@@ -47,9 +47,6 @@
             $uri = explode(':',$uri);
             $spotify_playlist = PlaylistInterface::get_playlist($uri[2],$uri[4]);
             $tracks = PlaylistInterface::get_playlist_tracks($spotify_playlist);
-            $tracks = array_map(function($item){
-                return $item->track;
-            },$tracks);
             $tracks = Helpers::reduceResults($tracks);
 
             $playlist = new Playlist();

@@ -96,6 +96,7 @@
 
                 // check each track
                 foreach ($tracks as $track) {
+                    $track = isset($track->track) ? $track->track : $track;
 
                     // be respective of objects or arrays
                     if ( (is_object($track) && ! $track->explicit) || (is_array($track) && ! $track['explicit']) ) {

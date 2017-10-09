@@ -17,6 +17,7 @@ class CreateSpotifyUsers extends Migration
             $table->increments('id');
             $table->string('user_id');
             $table->string('display_name')->nullable();
+            $table->string('email')->nullable();
             $table->string('url')->nullable();
             $table->string('uri')->nullable();
             $table->string('image')->nullable();

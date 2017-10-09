@@ -96,6 +96,7 @@
 
                 $user->user_id                 = $api_user->id;
                 $user->display_name            = $api_user->display_name;
+                $user->email                   = $api_user->email;
                 $user->url                     = $api_user->external_urls->spotify;
                 $user->uri                     = $api_user->uri;
                 if( count($api_user->images) > 0 ) {
