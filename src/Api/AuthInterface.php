@@ -96,19 +96,24 @@
 
                 $user->user_id                 = $api_user->id;
                 $user->display_name            = $api_user->display_name;
-                $user->email                   = $api_user->email;
                 $user->url                     = $api_user->external_urls->spotify;
                 $user->uri                     = $api_user->uri;
-                if( count($api_user->images) > 0 ) {
-                    $user->image        = $api_user->images[0]->url;
-                    $user->image_width  = $api_user->images[0]->width;
-                    $user->image_height = $api_user->images[0]->height;
-                }
                 $user->follower_count          = $api_user->followers->total;
                 $user->country                 = $api_user->country;
                 $user->access_token            = $session->getAccessToken();
                 $user->access_token_expiration = $session->getTokenExpiration();
                 $user->refresh_token           = $session->getRefreshToken();
+
+                if ( count($api_user->images) > 0 ) {
+                    $user->image = $api_user->images[0]->url;
+                    $user->image_width = $api_user->images[0]->width;
+                    $user->image_height = $api_user->images[0]->height;
+                }
+
+                if ( Helpers::hasScopes(['user-read-email']) ) {
+                    $user->email = $api_user->email;
+                }
+
                 $user->save();
 
                 Auth::guard('soda-spotify')->login($user);
