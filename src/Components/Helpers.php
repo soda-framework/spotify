@@ -206,27 +206,51 @@
         }
 
         public static function reduceResults($tracks, $imageType = 'artist') {
-            foreach ($tracks as $key => $track) {
-                $json = [
-                    'id'          => @$track->id,
-                    'name'        => @$track->name,
-                    'preview_url' => @$track->preview_url,
-                    'uri'         => @$track->uri,
-                    'url'         => @$track->external_urls->spotify,
-                    'album'       => [
-                        'id'    => @$track->album->id,
-                        'name'  => @$track->album->name,
-                        'image' => @$track->album->images[0]->url,
-                        'uri'   => @$track->album->uri,
-                        'url'   => @$track->album->external_urls->spotify,
-                    ],
-                    'artists'     => self::json_artists(@$track->artists, $imageType == 'artist')
-                ];
+            $tracks = collect((array) $tracks);
 
-                $tracks[$key] = $json;
+            $key = 0;
+            foreach ($tracks->chunk(50) as $_tracks) {
+                $artists_images = array_fill(0, 50, null);
+                if ( $imageType == 'artist' ) {
+                    // get the first artist from each track
+                    $artists_ids = $_tracks->map(function ($_track) {
+                        return $_track->artists[0]->id;
+                    });
+
+                    // get the full artists from the api
+                    $artists = ArtistInterface::get_artists($artists_ids->toArray());
+                    $artists = collect($artists->artists);
+
+                    // get the artist images
+                    $artists_images = $artists->map(function ($artist) {
+                        return isset($artist->images) && count($artist->images) > 0 ? $artist->images[0]->url : null;
+                    });
+                }
+
+                // reduce json
+                $_key = 0;
+                foreach ($_tracks as $_track) {
+                    $tracks[$key] = [
+                        'id'          => @$_track->id,
+                        'name'        => @$_track->name,
+                        'preview_url' => @$_track->preview_url,
+                        'uri'         => @$_track->uri,
+                        'url'         => @$_track->external_urls->spotify,
+                        'artists'     => self::json_artists(@$_track->artists, $artists_images[$_key]),
+                        'album'       => [
+                            'id'    => @$_track->album->id,
+                            'name'  => @$_track->album->name,
+                            'image' => @$_track->album->images[0]->url,
+                            'uri'   => @$_track->album->uri,
+                            'url'   => @$_track->album->external_urls->spotify,
+                        ],
+                    ];
+                    $_key++;
+                    $key++;
+                }
             }
 
-            return $tracks;
+            return $tracks->toArray();
         }
 
         public static function reachTrackLimit($tracks, $limit, $filler_track_ids) {
@@ -247,34 +271,21 @@
             return $tracks;
         }
 
-        public static function json_artists($artists, $includeImages = true) {
+        public static function json_artists($artists, $first_image = null) {
             $json = [];
-            $artists = collect((array) $artists);
-            foreach ($artists->chunk(50) as $_artists) {
-                if ( $includeImages ) {
-                    $_artist = $_artists->first();
-                    // check that images aren't already accessible
-                    if ( isset($_artist) && ( ! isset($_artist->images) || count($_artist->images) <= 0) ) {
-                        // get artists and their images if it isn't already available
-                        $_artists = ArtistInterface::get_artists($_artists->pluck('id')->toArray());
-                        $_artists = $_artists->artists;
-                    }
+            foreach ($artists as $key => $artist) {
+                $_artist = [
+                    'id'   => $artist->id,
+                    'name' => $artist->name,
+                    'uri'  => $artist->uri,
+                    'url'  => $artist->external_urls->spotify,
+                ];
+
+                if ( $first_image && $key == 0 ) {
+                    $_artist['image'] = $first_image;
                 }
 
-                foreach ($_artists as $artist) {
-                    $_artist = [
-                        'id'   => $artist->id,
-                        'name' => $artist->name,
-                        'uri'  => $artist->uri,
-                        'url'  => $artist->external_urls->spotify,
-                    ];
-
-                    if ( $includeImages ) {
-                        $_artist['image'] = isset($artist->images) && count($artist->images) > 0 ? $artist->images[0]->url : null;
-                    }
-
-                    $json[] = $_artist;
-                }
+                $json[] = $_artist;
             }
 
             return $json;

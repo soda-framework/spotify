@@ -7,31 +7,39 @@
     use Soda\Spotify\Api\Spotify;
     use Soda\Spotify\Api\SpotifyInterface;
     use Soda\Spotify\Api\SpotifySession;
+    use Soda\Spotify\Components\Helpers;
     use Soda\Spotify\Models\Settings;
     use Soda\Cms\Http\Controllers\BaseController;
     use Soda;
     use Symfony\Component\Debug\Exception;
 
     class TokenController extends BaseController {
-        public static function accessToken(){
+
+        public static function accessToken() {
             $settings = Settings::find(Settings::$settingID);
+
             return $settings ? $settings->access_token : null;
         }
-        public static function accessTokenExpiration(){
+
+        public static function accessTokenExpiration() {
             $settings = Settings::find(Settings::$settingID);
+
             return $settings ? (int) $settings->access_token_expiration : null;
         }
-        public static function refreshToken(){
+
+        public static function refreshToken() {
             $settings = Settings::find(Settings::$settingID);
+
             return $settings ? $settings->refresh_token : null;
         }
-        public static function isTokenExpired(){
+
+        public static function isTokenExpired() {
             return time() >= self::accessTokenExpiration();
         }
 
-        public static function updateTokens($access_token, $access_token_expiration){
+        public static function updateTokens($access_token, $access_token_expiration) {
             $settings = Settings::find(Settings::$settingID);
-            if( $settings ){
+            if ( $settings ) {
                 $settings->access_token = $access_token;
                 $settings->access_token_expiration = $access_token_expiration;
                 $settings->save();
@@ -42,7 +50,7 @@
             $return_url = $return_url ? $return_url : Input::get('url');
             $return_url = $return_url ? $return_url : URL::previous();
 
-            SpotifyInterface::savePage($return_url); // remember where we came from, so we can go back after logging in
+            Helpers::savePage($return_url); // remember where we came from, so we can go back after logging in
 
             return Redirect::to(route('spotify.token.login.go')); // need to redirect to save the session set above
         }
@@ -53,7 +61,7 @@
          */
         public function login_go() {
             // forget logged in user
-            SpotifyInterface::clearSession();
+            Helpers::clearSession();
 
             SpotifyInterface::setSpotifyCredentials(); // set Spotify ID and Secret
 

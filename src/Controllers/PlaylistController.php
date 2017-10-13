@@ -15,8 +15,7 @@
 
     class PlaylistController extends BaseController {
 
-        public function anyIndex()
-        {
+        public function anyIndex() {
             $filter = DataFilter::source(new Playlist());
             $filter->add('tracks', 'Tracks', 'text');
             $filter->submit('Search');
@@ -30,23 +29,24 @@
                 return '<a href=" ' . route('spotify.playlists.get.playlist', $id) . '" class="btn btn-warning">View</a>';
             });
             $grid->paginate(20);
+
             return view('soda-spotify::cms.playlists.index', compact('filter', 'grid'));
         }
 
-        public function getPlaylist($id = null)
-        {
+        public function getPlaylist($id = null) {
             $playlist = null;
-            if (!is_null($id)){
+            if ( ! is_null($id) ) {
                 $playlist = Playlist::find($id);
             }
+
             return view('soda-spotify::cms.playlists.playlist', compact('playlist'));
         }
 
-        public static function createPlaylistFromURI($uri)
-        {
-            $uri = explode(':',$uri);
-            $spotify_playlist = PlaylistInterface::get_playlist($uri[2],$uri[4]);
+        public static function createPlaylistFromURI($uri, $length = 50) {
+            $uri = explode(':', $uri);
+            $spotify_playlist = PlaylistInterface::get_playlist($uri[2], $uri[4]);
             $tracks = PlaylistInterface::get_playlist_tracks($spotify_playlist);
+            $tracks = array_slice($tracks, $length);
             $tracks = Helpers::reduceResults($tracks);
 
             $playlist = new Playlist();
@@ -60,7 +60,7 @@
 
         public function tracks($id) {
             $playlist = Playlist::whereId($id)->first();
-            if ( ! $playlist) {
+            if ( ! $playlist ) {
                 return response()->json(['success' => false, 'redirect' => '/']);
             }
 
@@ -74,8 +74,8 @@
          * @return playlist
          * @throws Exception
          */
-        public static function create_seeded_playlist($seeds, $limit=20, $filler_track_ids=[]){
-            if( isset($seeds['seed_genres']) || isset($seeds['seed_tracks']) || isset($seeds['seed_artists'])) {
+        public static function create_seeded_playlist($seeds, $limit = 20, $filler_track_ids = []) {
+            if ( isset($seeds['seed_genres']) || isset($seeds['seed_tracks']) || isset($seeds['seed_artists']) ) {
 
                 // lots of songs don't make the cut, overestimate the limit and trim later
                 $seed_limit = $limit < 100 ? 100 : $limit * 2;
@@ -88,24 +88,24 @@
                 $tracks = $tracks->tracks;
 
                 // merge seed tracks
-                if( isset($seeds['seed_tracks']) ){
+                if ( isset($seeds['seed_tracks']) ) {
                     $seed_tracks = TrackInterface::get_tracks($seeds['seed_tracks']);
                     $seed_tracks = $seed_tracks->tracks;
-                    $tracks = array_merge($seed_tracks,$tracks);
+                    $tracks = array_merge($seed_tracks, $tracks);
                 }
 
                 $tracks = Helpers::removeExplicit($tracks); // remove explicit
 
                 $tracks = Helpers::removeDuplicateArtists($tracks); // remove duplicates
 
-                if( count( $filler_track_ids ) > 0 ){
-                    $tracks = Helpers::reachTrackLimit($tracks,$limit,$filler_track_ids); // remove duplicates
+                if ( count($filler_track_ids) > 0 ) {
+                    $tracks = Helpers::reachTrackLimit($tracks, $limit, $filler_track_ids); // remove duplicates
                 }
 
                 $tracks = Helpers::reduceResults($tracks); // convert tracks to smaller data
 
                 // trim to actual limit
-                $tracks = array_slice($tracks,0,$limit);
+                $tracks = array_slice($tracks, 0, $limit);
 
                 // create playlist
                 $playlist = new Playlist();
@@ -113,8 +113,7 @@
                 $playlist->save();
 
                 return $playlist;
-            }
-            else {
+            } else {
                 throw new Exception("You MUST have any one of seed_genres, seed_tracks or seed_artists.");
             }
         }
