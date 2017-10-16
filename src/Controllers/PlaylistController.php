@@ -42,7 +42,7 @@
             return view('soda-spotify::cms.playlists.playlist', compact('playlist'));
         }
 
-        public static function createPlaylistFromURI($uri, $length = 50) {
+        public static function createPlaylistFromURI($uri, $length = 30) {
             $uri = explode(':', $uri);
             $spotify_playlist = PlaylistInterface::get_playlist($uri[2], $uri[4]);
             $tracks = PlaylistInterface::get_playlist_tracks($spotify_playlist);
