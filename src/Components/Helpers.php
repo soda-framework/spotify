@@ -2,6 +2,7 @@
 
     namespace Soda\Spotify\Components;
 
+    use Illuminate\Support\Collection;
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Facades\Redirect;
     use Illuminate\Support\Facades\Session;
@@ -208,12 +209,16 @@
         public static function reduceResults($tracks, $imageType = 'artist') {
             $tracks = collect((array) $tracks);
 
+            $tracks = $tracks->filter(function ($track) {
+                return $track->id && $track->artists[0]->id;
+            });
+
             $key = 0;
             foreach ($tracks->chunk(50) as $_tracks) {
                 $artists_images = array_fill(0, 50, null);
                 if ( $imageType == 'artist' ) {
                     // get the first artist from each track
-                    $artists_ids = $_tracks->map(function ($_track) {
+                    $artists_ids = $_tracks->map(function ($_track, $key) use ($_tracks) {
                         return $_track->artists[0]->id;
                     });
 
