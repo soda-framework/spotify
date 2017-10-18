@@ -211,7 +211,7 @@
 
             $tracks = $tracks->filter(function ($track) {
                 return $track->id && $track->artists[0]->id;
-            });
+            })->values();
 
             $key = 0;
             foreach ($tracks->chunk(50) as $_tracks) {
