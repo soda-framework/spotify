@@ -3,8 +3,10 @@
     namespace Soda\Spotify\Api;
 
     use App\Http\Controllers\Controller;
+    use Soda\Spotify\Components\Helpers;
 
     class ArtistInterface extends Controller {
+
         /**
          * @param $id
          *
@@ -12,13 +14,13 @@
          *
          * Get the artist object for an id
          */
-        public static function get_artist($id, $api=null) {
+        public static function get_artist($id, $api = null) {
             $api = $api ? $api : APIInterface::initPublicAPI();
 
             return $api->getArtist($id);
         }
 
-        public static function get_artists($ids, $api=null) {
+        public static function get_artists($ids, $api = null) {
             $api = $api ? $api : APIInterface::initPublicAPI();
 
             return $api->getArtists($ids);
@@ -32,7 +34,7 @@
             return $image;
         }
 
-        public static function get_artist_name($artist){
+        public static function get_artist_name($artist) {
             return @$artist->name;
         }
 
@@ -40,7 +42,7 @@
             $bits = explode(':', $uri);
 
             $url = '';
-            if (count($bits) == 3) {
+            if ( count($bits) == 3 ) {
                 $url = 'https://open.spotify.com/artist/' . $bits[2];
             }
 
@@ -72,7 +74,7 @@
             // get top tracks array
             $tracks = $api->getArtistTopTracks($artist, ['country' => $country]);
 
-            $tracks = SpotifyInterface::removeExplicit($tracks->tracks);
+            $tracks = Helpers::removeExplicit($tracks->tracks);
 
             // return amount
             $tracks = array_slice($tracks, 0, $count);
