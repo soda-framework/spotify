@@ -14,7 +14,7 @@
     class SettingsController extends BaseController {
         public function getModify()
         {
-            $settings = Settings::findOrNew(Settings::$settingID);
+            $settings = Settings::findOrNew(Settings::SETTING_ID);
             return view('soda-spotify::cms.settings.modify', compact('settings'));
         }
 
@@ -28,8 +28,8 @@
                 'playlist_title' => 'max:255',
             ]);
 
-            $settings = ($request->has('id'))? Settings::find($request->input('id')) : new Settings;
-            $settings->id = Settings::$settingID;
+            $settings = ($request->has('id') && !is_null($request->input('id')))? Settings::find($request->input('id')) : new Settings;
+            $settings->id = Settings::SETTING_ID;
             $settings->client_id = $request->input('client_id');
             $settings->client_secret = $request->input('client_secret');
             $settings->package = $request->input('package');
@@ -40,11 +40,11 @@
         }
 
         public static function clientId(){
-            $settings = Settings::find(Settings::$settingID);
+            $settings = Settings::find(Settings::SETTING_ID);
             return $settings ? $settings->client_id : false;
         }
         public static function clientSecret(){
-            $settings = Settings::find(Settings::$settingID);
+            $settings = Settings::find(Settings::SETTING_ID);
             return $settings ? $settings->client_secret : false;
         }
     }

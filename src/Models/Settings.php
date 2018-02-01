@@ -3,7 +3,7 @@
     use Illuminate\Database\Eloquent\Model;
 
     class Settings extends Model{
-        public static $settingID = 1;
+        const SETTING_ID = 1;
 
         protected $table = 'spotify_settings';
         protected $fillable = [

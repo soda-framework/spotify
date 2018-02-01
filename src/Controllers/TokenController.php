@@ -16,19 +16,19 @@
     class TokenController extends BaseController {
 
         public static function accessToken() {
-            $settings = Settings::find(Settings::$settingID);
+            $settings = Settings::find(Settings::SETTING_ID);
 
             return $settings ? $settings->access_token : null;
         }
 
         public static function accessTokenExpiration() {
-            $settings = Settings::find(Settings::$settingID);
+            $settings = Settings::find(Settings::SETTING_ID);
 
             return $settings ? (int) $settings->access_token_expiration : null;
         }
 
         public static function refreshToken() {
-            $settings = Settings::find(Settings::$settingID);
+            $settings = Settings::find(Settings::SETTING_ID);
 
             return $settings ? $settings->refresh_token : null;
         }
@@ -38,7 +38,7 @@
         }
 
         public static function updateTokens($access_token, $access_token_expiration) {
-            $settings = Settings::find(Settings::$settingID);
+            $settings = Settings::find(Settings::SETTING_ID);
             if ( $settings ) {
                 $settings->access_token = $access_token;
                 $settings->access_token_expiration = $access_token_expiration;
@@ -99,7 +99,7 @@
             $api->setAccessToken($accessToken);
             $user = $api->me();
 
-            $settings = Settings::find(Settings::$settingID);
+            $settings = Settings::find(Settings::SETTING_ID);
             $settings->token_user = $user->id;
             $settings->token_user_link = $user->external_urls->spotify;
             $settings->access_token = $session->getAccessToken();

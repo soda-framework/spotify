@@ -81,7 +81,7 @@
         }
 
         public static function save_link($playlist,$return='redirect',$name=false,$image=false) {
-            $settings = Settings::find(Settings::$settingID);
+            $settings = Settings::find(Settings::SETTING_ID);
             $name = $name ? $name : $settings->playlist_title;
             $image = $image ? $image : $settings->playlist_image;
 

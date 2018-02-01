@@ -35,7 +35,7 @@
     });
 
     if ( ! app()->runningInConsole() && Schema::hasTable((new Settings)->getTable()) ) {
-        $settings = Settings::find(Settings::$settingID);
+        $settings = Settings::find(Settings::SETTING_ID);
         if ( $settings && ( isset($settings->package) || isset($settings->action) ) ) {
             Route::get('/playlist/{id}', '\Soda\Spotify\Controllers\PageController@playlist')->name('spotify.playlist');
         }

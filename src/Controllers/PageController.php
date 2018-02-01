@@ -18,7 +18,7 @@
 
         public function playlist($id){
             $playlist = Playlist::find($id);
-            $settings = Settings::find(Settings::$settingID);
+            $settings = Settings::find(Settings::SETTING_ID);
 
             if( !$playlist || !$settings ){
                 return Redirect::to('/');
