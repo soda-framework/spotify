@@ -71,10 +71,13 @@
          * @param $seeds - array of seeds as defined in https://developer.spotify.com/web-api/get-recommendations/
          * @param int $limit (optional) - desired number of tracks
          *
-         * @return playlist
-         * @throws Exception
+         * @param bool $merge_seeds - whether or not to add the seed track into the results
+         * @param array $filler_track_ids
+         *
+         * @return Playlist
+         * @throws \Exception
          */
-        public static function create_seeded_playlist($seeds, $limit = 20, $filler_track_ids = []) {
+        public static function create_seeded_playlist($seeds, $limit = 20, $filler_track_ids = [], $merge_seeds = true) {
             if ( isset($seeds['seed_genres']) || isset($seeds['seed_tracks']) || isset($seeds['seed_artists']) ) {
 
                 // lots of songs don't make the cut, overestimate the limit and trim later
@@ -88,7 +91,7 @@
                 $tracks = $tracks->tracks;
 
                 // merge seed tracks
-                if ( isset($seeds['seed_tracks']) ) {
+                if ( $merge_seeds && isset($seeds['seed_tracks']) ) {
                     $seed_tracks = TrackInterface::get_tracks($seeds['seed_tracks']);
                     $seed_tracks = $seed_tracks->tracks;
                     $tracks = array_merge($seed_tracks, $tracks);
@@ -114,7 +117,7 @@
 
                 return $playlist;
             } else {
-                throw new Exception("You MUST have any one of seed_genres, seed_tracks or seed_artists.");
+                throw new \Exception("You MUST have any one of seed_genres, seed_tracks or seed_artists.");
             }
         }
     }
