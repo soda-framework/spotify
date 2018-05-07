@@ -80,16 +80,20 @@
             return $route;
         }
 
-        public static function save_link($playlist,$return='redirect',$name=false,$image=false) {
+        public static function save_link($playlist,$return='redirect',$options=[]) {
+            // backups
             $settings = Settings::find(Settings::SETTING_ID);
-            $name = $name ? $name : $settings->playlist_title;
-            $image = $image ? $image : $settings->playlist_image;
+            $options['name'] = isset($options['name']) ? $options['name'] : $settings->playlist_title;
+            $options['image'] = isset($options['image']) ? $options['image'] : $settings->playlist_image;
 
-            $params = ['name' => $name, 'image' => $image, 'playlist_id' => $playlist->id];
-            $params['return'] = $return;
+            // other details
+            $options['playlist_id'] = $playlist->id;
+            $options['return'] = $return;
 
-            $route = route('spotify.api.playlist.add', $params);
-            $route = route('spotify.login', ['url' => $route]);
+            // create urls
+            $route = route('spotify.api.playlist.add', $options); // add playlist to logged in users account
+            $route = route('spotify.login', ['url' => $route]); // log in, then redirect to the above ^
+
             // smart idea, but was a hassle for dev when we need to approve/un-approve apps when permissions change. Easier to log in every time.
 //            if ( ! AuthInterface::is_logged_in() ) {
 //                $route = route('spotify.login', ['url' => $route]);
@@ -126,6 +130,7 @@
 
         public function add_playlist(Request $request) {
             $name = $request->input('name');
+            $description = $request->input('description');
             $image = $request->input('image');
             $tracklist = (array) $request->input('tracklist'); // optional
             $playlist_id = $request->input('playlist_id');
@@ -142,7 +147,10 @@
                 $api = APIInterface::getUserAPI($user);
 
                 // Create user playlist
-                $user_playlist = $api->createUserPlaylist($user->user_id, ['name' => $name]);
+                $user_playlist = $api->createUserPlaylist($user->user_id, [
+                    'name' => $name,
+                    'description' => $description,
+                ]);
 
                 // add tracks to the playlist
                 $api->addUserPlaylistTracks($user->user_id, $user_playlist->id, $tracklist);
