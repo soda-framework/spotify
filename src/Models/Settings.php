@@ -1,11 +1,8 @@
 <?php
+    namespace Soda\Spotify\Models;
+    use Illuminate\Database\Eloquent\Model;
 
-namespace Soda\Spotify\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-    class Settings extends Model
-    {
+    class Settings extends Model{
         const SETTING_ID = 1;
 
         protected $table = 'spotify_settings';

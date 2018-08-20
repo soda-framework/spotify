@@ -8,6 +8,8 @@ class CreateSpotifySettings extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
     public function up()
     {
@@ -31,6 +33,8 @@ class CreateSpotifySettings extends Migration
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
     public function down()
     {
