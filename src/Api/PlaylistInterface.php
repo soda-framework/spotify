@@ -84,7 +84,7 @@
             // backups
             $settings = Settings::find(Settings::SETTING_ID);
             $options['name'] = isset($options['name']) ? $options['name'] : $settings->playlist_title;
-            $options['name'] = isset($options['description']) ? $options['description'] : $settings->playlist_description;
+            $options['description'] = isset($options['description']) ? $options['description'] : $settings->playlist_description;
             $options['image'] = isset($options['image']) ? $options['image'] : $settings->playlist_image;
 
             // other details
