@@ -76,6 +76,11 @@
                 'field_name'  => 'playlist_title',
             ])->setModel($settings) !!}
 
+            {!! app('soda.form')->text([
+                'name'        => 'Playlist Description',
+                'field_name'  => 'playlist_description',
+            ])->setModel($settings) !!}
+
             {!! app('soda.form')->fancy_upload([
                 'name'        => 'Playlist Image',
                 'field_name'  => 'playlist_image',

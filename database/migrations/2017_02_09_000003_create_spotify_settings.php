@@ -8,8 +8,6 @@ class CreateSpotifySettings extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
@@ -20,6 +18,7 @@ class CreateSpotifySettings extends Migration
             $table->string('package')->nullable();
             $table->string('action')->nullable();
             $table->string('playlist_title')->nullable();
+            $table->string('playlist_description')->nullable();
             $table->string('playlist_image')->nullable();
             $table->string('token_user')->nullable();
             $table->string('token_user_link')->nullable();
@@ -32,8 +31,6 @@ class CreateSpotifySettings extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {
